@@ -1,9 +1,14 @@
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import router
 from app.core.config import get_settings
 from app.services.agent import ComplianceInspectionAgent
 from app.services.cache import AnalysisCache
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
 def create_app() -> FastAPI:
@@ -17,6 +22,11 @@ def create_app() -> FastAPI:
     app.state.agent = ComplianceInspectionAgent(settings)
     app.state.cache = AnalysisCache(settings.cache_ttl_seconds)
     app.include_router(router)
+
+    if STATIC_DIR.exists():
+        app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static_assets")
+        app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
+
     return app
 
 

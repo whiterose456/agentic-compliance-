@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Compliance Inspection Agent (Service 2)</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-badge">AI-2</div>
+      <div>
+        <h1>AI Compliance Inspection Agent</h1>
+        <p class="subtitle">Grounded, auditable financial document review &bull; Substring-verified</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-pill" id="provider-pill">
+        <span class="status-dot"></span>
+        <span id="provider-text">Provider: loading...</span>
+      </div>
+      <button id="btn-view-rules" class="btn-secondary" title="Inspect loaded SEC/FINRA rules">
+        View Active Rules (<span id="rule-count-badge">...</span>)
+      </button>
+    </div>
+  </header>
+
+  <main class="app-layout">
+    <!-- Preset toolbar -->
+    <section class="presets-bar">
+      <span class="presets-label">Quick Presets:</span>
+      <button class="preset-btn" data-preset="investment">Investment Agreement (Guarantee & Risk)</button>
+      <button class="preset-btn" data-preset="brochure">Brochure (Superlatives & Endorsement)</button>
+      <button class="preset-btn" data-preset="newsletter">Newsletter (Certainty & Liquidity)</button>
+      <button class="preset-btn" data-preset="clean">Compliant Sample (0 Violations)</button>
+    </section>
+
+    <!-- Side by Side Review Area -->
+    <div class="workbench-grid">
+      <!-- Left: Document Input and Highlighted Review -->
+      <section class="panel document-panel">
+        <div class="panel-header">
+          <h2>1. Source Document</h2>
+          <div class="doc-controls">
+            <input type="text" id="doc-id-input" value="doc-investment-001" placeholder="Document ID" title="Document ID">
+            <select id="doc-type-select" title="Document Type">
+              <option value="INVESTMENT_AGREEMENT">INVESTMENT_AGREEMENT</option>
+              <option value="BROCHURE">BROCHURE</option>
+              <option value="NEWSLETTER">NEWSLETTER</option>
+              <option value="GENERAL">GENERAL</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tab-controls">
+          <button class="tab-btn active" id="tab-editor">Editor &amp; Input</button>
+          <button class="tab-btn" id="tab-highlighted">Audited View (<span id="highlight-count">0</span> flags)</button>
+        </div>
+
+        <div class="panel-body">
+          <div id="editor-container" class="tab-pane active">
+            <textarea id="document-text" placeholder="Paste or type document text here to inspect..." rows="16"></textarea>
+          </div>
+          <div id="highlighted-container" class="tab-pane">
+            <div id="highlighted-view" class="highlighted-document-box">
+              <p class="placeholder-text">Run inspection to view grounded character-offset highlights.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-footer">
+          <div class="footer-stats">
+            <span id="char-count">0 chars</span> &bull; 
+            <span id="para-count">0 sections</span>
+          </div>
+          <button id="btn-analyze" class="btn-primary">
+            <span class="btn-text">Run Compliance Inspection</span>
+            <span class="btn-spinner" style="display:none;"></span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Right: Audit Findings & Human Reviewer Gate -->
+      <section class="panel findings-panel">
+        <div class="panel-header">
+          <h2>2. Audit Findings &amp; Grounding</h2>
+          <div class="metrics-bar" id="metrics-bar" style="display:none;">
+            <span class="metric-chip" title="Grounded flags that matched verbatim">
+              <strong id="metric-accepted">0</strong> Validated
+            </span>
+            <span class="metric-chip warning" title="Hallucinated or ungrounded proposals rejected by validator">
+              <strong id="metric-discarded">0</strong> Discarded
+            </span>
+            <span class="metric-chip" id="metric-cache-chip" title="Analysis cache status">
+              Cache: <span id="metric-cache">MISS</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="panel-body findings-list-container">
+          <div id="findings-placeholder" class="empty-state">
+            <div class="empty-icon">&#128269;</div>
+            <p><strong>No inspection run yet</strong></p>
+            <p class="hint">Click "Run Compliance Inspection" to scan against active compliance rules. Every candidate flag is verified against exact document substrings.</p>
+          </div>
+          <div id="findings-list" class="findings-list" style="display:none;"></div>
+        </div>
+
+        <!-- Human in the Loop Decision Block (Strictly Enforced) -->
+        <div class="human-decision-block">
+          <div class="decision-header">
+            <div>
+              <span class="decision-label">System Decision Gate:</span>
+              <span class="badge badge-pending" id="system-decision-badge">PENDING_HUMAN_REVIEW</span>
+            </div>
+            <span class="gate-note">AI approval/rejection is architecturally blocked</span>
+          </div>
+
+          <div class="officer-action-box">
+            <label for="officer-notes">Compliance Officer Review Notes:</label>
+            <textarea id="officer-notes" rows="2" placeholder="e.g. Rejecting due to illegal 18% guarantee and lack of past-performance disclosure."></textarea>
+            
+            <div class="decision-actions">
+              <button id="btn-human-reject" class="btn-danger" disabled>
+                &#10006; Reject Document
+              </button>
+              <button id="btn-human-approve" class="btn-success" disabled>
+                &#10004; Approve Document
+              </button>
+            </div>
+            <div id="human-decision-banner" class="decision-record-banner" style="display:none;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Rules Modal -->
+  <div id="rules-modal" class="modal-backdrop" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Active Compliance Rules Database (mock_rules.json)</h3>
+        <button id="btn-close-modal" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          These rules serve as the authoritative compliance fixtures. Severities are strictly sourced from this table and are never trusted from LLM candidate outputs.
+        </p>
+        <div id="rules-table-container">
+          <table class="rules-table">
+            <thead>
+              <tr>
+                <th>Rule ID</th>
+                <th>Severity</th>
+                <th>Title &amp; Description</th>
+                <th>Applicable Document Types</th>
+              </tr>
+            </thead>
+            <tbody id="rules-table-body">
+              <tr><td colspan="4">Loading rules...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

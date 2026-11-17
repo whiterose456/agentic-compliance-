@@ -31,7 +31,7 @@ cp .env.example .env
 uvicorn app.main:app --reload
 ```
 
-Open http://127.0.0.1:8000/docs for the interactive API. The default provider is **mock**, so no API key is required.
+Open http://127.0.0.1:8000 for the compliance review UI, or http://127.0.0.1:8000/docs for the interactive API. The default provider is **mock**, so no API key is required.
 
 ## Example request
 
@@ -47,6 +47,7 @@ curl -X POST http://127.0.0.1:8000/analyze \
 
 ## API endpoints
 
+- `GET /` — browser-based compliance review UI.
 - `GET /health` — health and provider mode.
 - `GET /rules` — list the active mock rules.
 - `POST /analyze` — analyze a text document and return validated findings.
