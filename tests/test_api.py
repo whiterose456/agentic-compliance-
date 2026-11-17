@@ -26,3 +26,23 @@ def test_analysis_cache():
                "text": "We guarantee a 15% annual return."}
     assert client.post("/analyze", json=payload).json()["cache_hit"] is False
     assert client.post("/analyze", json=payload).json()["cache_hit"] is True
+
+
+def test_rules_endpoint():
+    client = TestClient(create_app())
+    response = client.get("/rules")
+    assert response.status_code == 200
+    rules = response.json()
+    assert isinstance(rules, list)
+    assert len(rules) > 0
+    assert any(r["rule_id"] == "RULE-001" for r in rules)
+
+
+def test_static_frontend_served():
+    client = TestClient(create_app())
+    index_res = client.get("/")
+    assert index_res.status_code == 200
+    assert "AI Compliance Inspection Agent" in index_res.text
+    js_res = client.get("/static/app.js")
+    assert js_res.status_code == 200
+    assert "PRESETS" in js_res.text

@@ -28,6 +28,8 @@ class ValidatedFinding(BaseModel):
 
 
 class AnalyzeResponse(BaseModel):
+    model_config = {"protected_namespaces": ()}
+
     document_id: str
     findings: list[ValidatedFinding]
     discarded_findings: int
