@@ -2,7 +2,7 @@
 
 Implementation of **Service 2** from the Compliance Document Review App task roadmap. The service analyzes document sections against a mock compliance rule set, then validates every proposed finding against the original source before returning it.
 
-> **Prototype only:** The included rules are illustrative engineering fixtures, not authoritative legal interpretations or legal advice. A human reviewer retains final decision authority.
+> 
 
 ## What it does
 
